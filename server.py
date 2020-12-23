@@ -13,7 +13,7 @@ app.config["DEBUG"] = True
 @app.route("/", methods=['GET'])
 def home():
     resultado = {'idUtilizador': 2}
-    return render_template('templates/index.html')
+    return render_template('index.html')
 
 port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
