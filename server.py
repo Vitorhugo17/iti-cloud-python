@@ -1,20 +1,15 @@
-# imports
-import pandas as pd
-import numpy as np
-import warnings
-import flask
-from flask import request, Response, jsonify, render_template
-import json
+from flask import Flask
+from flask import render_template
 
-warnings.filterwarnings('ignore')
+# creates a Flask application, named app
+app = Flask(__name__)
 
+# a route where we will display a welcome message via an HTML template
+@app.route("/")
+def hello():
+    message = "Hello, World"
+    return render_template('index.html', message=message)
 
-app = flask.Flask(__name__)
-app.config["DEBUG"] = True
-
-
-@app.route('/', methods=['GET'])
-def home():
-    return render_template('./index.html')
-
-app.run()
+# run the application
+if __name__ == "__main__":
+    app.run(debug=True)
