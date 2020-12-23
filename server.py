@@ -1,6 +1,5 @@
 import warnings
-import flask
-from flask import request, Response, jsonify
+from flask import request, Response, Flask
 import json
 
 warnings.filterwarnings('ignore')
