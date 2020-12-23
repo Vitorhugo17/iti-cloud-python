@@ -15,4 +15,5 @@ def home():
     resultado = {'idUtilizador': 2}
     return Response(json.dumps(resultado),  mimetype='application/json')
 
-app.run()
+port = int(os.environ.get("PORT", 5000))
+app.run(host="0.0.0.0", port=port)
