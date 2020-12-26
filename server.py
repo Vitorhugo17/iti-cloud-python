@@ -32,8 +32,6 @@ app.config["DEBUG"] = True
 @app.route('/sensors/data', methods=['POST']) #GET requests will be blocked
 def json_example():
     req_data = request.get_json(force=True)
-
-
  
     local = req_data['local']
     month = req_data['month']
@@ -45,7 +43,7 @@ def json_example():
     rain = req_data['rain']
     time = req_data['time']
     
-    val = (local,month,day_of_week,day,day,temperature,rh,wind,rain,time)
+    val = (local,month,day_of_week,day,temperature,rh,wind,rain,time)
 
     sql = "INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
@@ -75,8 +73,6 @@ def home():
             "y": x[7]
         }  
         results.append(result)
-        
-        
     
     return Response(json.dumps(results), mimetype="application/json")
 
