@@ -20,11 +20,42 @@ mydb = mysql.connector.connect(
   database="heroku_6190d228ed81d9a"
 )
 
+
 mycursor = mydb.cursor()
 
 # creates a Flask application, named app
 app = Flask(__name__)
 app.config["DEBUG"] = True
+
+
+
+@app.route('/sensors/data', methods=['POST']) #GET requests will be blocked
+def json_example():
+    req_data = request.get_json(force=True)
+
+
+ 
+    local = req_data['local']
+    month = req_data['month']
+    day_of_week = req_data['day_of_week']
+    day = req_data['day']
+    temperature = req_data['temperature']
+    rh = req_data['rh']
+    wind = req_data['wind']
+    rain = req_data['rain']
+    time = req_data['time']
+    
+    val = (local,month,day_of_week,day,day,temperature,rh,wind,rain,time)
+
+    sql = "INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+    mycursor.execute(sql, val)
+    mydb.commit() 
+
+    print(mycursor.rowcount, "record inserted.")
+
+    return Response(json.dumps(val), mimetype="application/json")
+  
 
 # a route where we will display a welcome message via an HTML template
 @app.route("/", methods=['GET'])
@@ -43,6 +74,7 @@ def home():
             "y": x[7]
         }  
         results.append(result)
+        
     
     return Response(json.dumps(results), mimetype="application/json")
 
