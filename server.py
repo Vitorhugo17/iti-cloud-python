@@ -50,6 +50,7 @@ def json_example():
     sql = "INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
     mycursor.execute(sql, val)
+    
     mydb.commit() 
 
     print(mycursor.rowcount, "record inserted.")
