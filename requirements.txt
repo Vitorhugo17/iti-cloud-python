@@ -1,1 +1,5 @@
 flask
+mysql-connector-python
+pandas
+sklearn
+numpy
