@@ -176,6 +176,5 @@ def variables_values():
     }
     return Response(json.dumps(results), mimetype="application/json")
 
-port = int(os.environ.get("PORT", 5000))
-print(port)
-app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    app.run()
