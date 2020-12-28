@@ -6,6 +6,7 @@ import sklearn
 import pickle
 from sklearn.model_selection import train_test_split
 # from sklearn.ensemble import RandomForestClassifier
+from sklearn.feature_selection import RFE
 from sklearn.linear_model import LogisticRegression
 
 mydb = mysql.connector.connect(
@@ -46,8 +47,11 @@ y = df['y']
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, y, test_size=0.2)
 
-# model = LogisticRegression()
-# model.fit(X_train, Y_train)
+# logreg = LogisticRegression()
+# model = RFE(logreg, 20)
+# model = model.fit(X_train, Y_train.values.ravel())
+# print(model.support_)
+# print(model.ranking_)
 # pickle.dump(X_test, open("models/X_test.csv", 'wb'))
 # pickle.dump(Y_test, open("models/Y_test.csv", 'wb'))
 # pickle.dump(model, open("models/model.sav", 'wb'))
