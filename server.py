@@ -9,7 +9,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 # from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from flask import request, Response, Flask, render_template,jsonify
+from flask import request, Response, Flask, render_template
 import json
 
 warnings.filterwarnings('ignore')
@@ -27,8 +27,6 @@ mydb = mysql.connector.connect(
   database='heroku_6190d228ed81d9a'
 )
 
-mycursor = mydb.cursor()
-
 # creates a Flask application, named app
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -37,10 +35,12 @@ app.config['DEBUG'] = True
 @app.route('/forest/fire/probability', methods=['GET'])
 def forest_fire_probability():
     results = []
-
+    
+    mycursor = mydb.cursor()
     mycursor.execute('SELECT * FROM sensors_data')
     myresult = mycursor.fetchall()
-    
+    mycursor.close()
+
     local_data = pd.DataFrame(columns=['local','month','day_of_week','day','temperature','rh','wind','rain','time'])
 
     for x in myresult:
@@ -127,11 +127,13 @@ def sensores_data():
 
     sql = 'INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
+    mycursor = mydb.cursor()
     mycursor.execute(sql, val)
-
+    
     mydb.commit() 
 
     print(mycursor.rowcount, 'record inserted.')
+    mycursor.close()
 
     return Response(json.dumps(val), mimetype='application/json')
   
@@ -143,8 +145,11 @@ def home():
     wind = []
     rain = []
 
+    mycursor = mydb.cursor()
     mycursor.execute('SELECT * FROM training_data')
     myresult = mycursor.fetchall()
+    mycursor.close()
+    
     for x in myresult:
         temperature.append(x[3])
         humidity.append(x[4])
