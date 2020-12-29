@@ -9,7 +9,7 @@ import pickle
 from sklearn.model_selection import train_test_split
 # from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from flask import request, Response, Flask, render_template
+from flask import request, Response, Flask, render_template,jsonify
 import json
 
 warnings.filterwarnings('ignore')
@@ -21,39 +21,39 @@ months_names = {'01': 'jan','02': 'feb','03': 'mar','04': 'apr','05': 'may',
            '06': 'jun','07': 'jul','08': 'aug','09': 'sep','10': 'oct','11': 'nov','12': 'dec'}
 
 mydb = mysql.connector.connect(
-  host="eu-cdbr-west-03.cleardb.net",
-  user="bbf0bb7ad96b16",
-  password="bc7d6872",
-  database="heroku_6190d228ed81d9a"
+  host='eu-cdbr-west-03.cleardb.net',
+  user='bbf0bb7ad96b16',
+  password='bc7d6872',
+  database='heroku_6190d228ed81d9a'
 )
 
 mycursor = mydb.cursor()
 
 # creates a Flask application, named app
 app = Flask(__name__)
-app.config["DEBUG"] = True
+app.config['DEBUG'] = True
 
 
 @app.route('/forest/fire/probability', methods=['GET'])
 def forest_fire_probability():
     results = []
 
-    mycursor.execute("SELECT * FROM sensors_data")
+    mycursor.execute('SELECT * FROM sensors_data')
     myresult = mycursor.fetchall()
     
-    local_data = pd.DataFrame(columns=["local","month","day_of_week","day","temperature","rh","wind","rain","time"])
+    local_data = pd.DataFrame(columns=['local','month','day_of_week','day','temperature','rh','wind','rain','time'])
 
     for x in myresult:
         row = {
-            "local": x[1],
-            "month": x[2],
-            "day_of_week": x[3],
-            "day": x[4],
-            "temperature": x[5],
-            "rh": x[6],
-            "wind": x[7],
-            "rain": x[8],
-            "time": x[9].total_seconds()
+            'local': x[1],
+            'month': x[2],
+            'day_of_week': x[3],
+            'day': x[4],
+            'temperature': x[5],
+            'rh': x[6],
+            'wind': x[7],
+            'rain': x[8],
+            'time': x[9].total_seconds()
         }
         local_data = local_data.append(row, ignore_index=True)
       
@@ -69,7 +69,7 @@ def forest_fire_probability():
     
     #separate variables not use in prediction from the variables used in prediction
     time_data = local_data[['local','day','time']]
-    local_data = local_data.drop(labels=["local","day","time"], axis=1)
+    local_data = local_data.drop(labels=['local','day','time'], axis=1)
     local_data = local_data.rename(columns={'day_of_week': 'day', 'temperature': 'temp'})
     
     # change month number to month name
@@ -79,8 +79,8 @@ def forest_fire_probability():
     data_pred = pd.get_dummies(local_data)
 
     #load model and model used to train data to get columns names
-    model = pickle.load(open("models/model.sav", 'rb'))
-    X_data = pickle.load(open("models/X_test.csv", 'rb'))
+    model = pickle.load(open('models/model.sav', 'rb'))
+    X_data = pickle.load(open('models/X_test.csv', 'rb'))
 
     # remove all values from train data dataframe
     X_data = pd.DataFrame(columns=X_data.columns)
@@ -97,13 +97,16 @@ def forest_fire_probability():
 
     for x in range(len(pred)):
         result = {
-            "local": time_data.iloc[x]['local'],
-            "fire_probability": pred[x][1]
+            'local': time_data.iloc[x]['local'],
+            'probability': pred[x][1]
         }
 
         results.append(result)
 
-    return Response(json.dumps(results), mimetype="application/json")
+    print(results)
+
+    return render_template("risco_incendio.html", results=json.dumps(results))
+    # return Response(json.dumps(results), mimetype='application/json')
 
 
 @app.route('/sensors/data', methods=['POST'])
@@ -122,40 +125,43 @@ def sensores_data():
     
     val = (local,month,day_of_week,day,temperature,rh,wind,rain,time)
 
-    sql = "INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    sql = 'INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
     mycursor.execute(sql, val)
 
     mydb.commit() 
 
-    print(mycursor.rowcount, "record inserted.")
+    print(mycursor.rowcount, 'record inserted.')
 
-    return Response(json.dumps(val), mimetype="application/json")
+    return Response(json.dumps(val), mimetype='application/json')
   
 
-@app.route("/", methods=['GET'])
+@app.route('/', methods=['GET'])
 def home():
-    results = {}
-    temp = []
-    rh = []
+    temperature = []
+    humidity = []
     wind = []
     rain = []
 
-    mycursor.execute("SELECT * FROM training_data")
+    mycursor.execute('SELECT * FROM training_data')
     myresult = mycursor.fetchall()
     for x in myresult:
-        temp.append(x[3])
-        rh.append(x[4])
+        temperature.append(x[3])
+        humidity.append(x[4])
         wind.append(x[5])
         rain.append(x[6])
 
-    results = {
-        "temperature": list(dict.fromkeys(temp)),
-        "humidity": list(dict.fromkeys(rh)),
-        "wind": list(dict.fromkeys(wind)),
-        "rain": list(dict.fromkeys(rain))
-    }
-    return Response(json.dumps(results), mimetype="application/json")
+    temperature = list(dict.fromkeys(temperature))
+    humidity = list(dict.fromkeys(humidity))
+    wind = list(dict.fromkeys(wind))
+    rain = list(dict.fromkeys(rain))
+    
+    return render_template(
+        'envio_dados.html',
+        temperature=temperature, 
+        humidity=humidity, 
+        wind=wind, 
+        rain=rain)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run()
