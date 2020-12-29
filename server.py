@@ -135,25 +135,6 @@ def sensores_data():
 
 @app.route("/", methods=['GET'])
 def home():
-    mycursor.execute("SELECT * FROM training_data")
-    myresult = mycursor.fetchall()
-    results = []
-    for x in myresult:
-        result = {
-            "month": x[1],
-            "day": x[2],
-            "temp": x[3],
-            "rh": x[4],
-            "wind": x[5],
-            "rain": x[6],
-            "y": x[7]
-        }  
-        results.append(result)
-    
-    return Response(json.dumps(results), mimetype="application/json")
-
-@app.route("/variables/values", methods=['GET'])
-def variables_values():
     results = {}
     temp = []
     rh = []
