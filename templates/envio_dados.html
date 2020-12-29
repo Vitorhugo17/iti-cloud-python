@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png"
-        href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/img/favicon.png" />
+        href="/static/img/favicon.png" />
     <title>FireData</title>
-    <link rel="stylesheet" href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
@@ -17,7 +17,7 @@
             <div class="card-header">
                 <h1>Bem vindo ao Fire Data</h1><br>
                 <br>
-                <form id="enviarDados">
+                <form id="formEnviarDados">
                     <select class="btn btn-success dropdown-toggle" name="local" id="local">
                         <option value="" selected disabled hidden>Selecionar Localidade</option>
                         <option value="Esporões">Esporões</option>
@@ -26,7 +26,8 @@
                         <option value="Amares">Amares</option>
                     </select><br>
                     <br>
-                    <button type="submit" class="btn btn-success">Enviar Dados</button>
+                    <button type="submit" class="btn btn-success" id="enviarDados">Enviar Dados</button>
+                    <button type="submit" class="btn btn-danger" id="pararEnvioDados">Parar Envio Dados</button>
                 </form>
                 <br>
                 <div class="card-body">
@@ -50,24 +51,96 @@
 
         </div>
 
-        <script>
+        <script>            
+            const months_names = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+            const day_of_week_names = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
+            
             const temperature = {{temperature}};
             const humidity = {{humidity}};
             const wind = {{wind}};
             const rain = {{rain}};
 
-            document.getElementById("enviarDados").addEventListener("submit", (event)=>{
+            let intervalID = 0;
+
+            document.getElementById("formEnviarDados").addEventListener("submit", (event)=>{
                 event.preventDefault()
+            })
+
+            document.getElementById("enviarDados").addEventListener("click", (event)=>{
+                event.preventDefault()
+                
+                sendData();
+                intervalID = setInterval(sendData, 15000);
+            })
+
+            document.getElementById("pararEnvioDados").addEventListener("click", (event)=>{
+                event.preventDefault()
+                
+                if (intervalID != 0) {
+                    clearInterval(intervalID);
+
+                    const tableData = document.getElementById("tableData");
+
+                    let txt = `<tr><td colspan="4"><center>Parou o envio dos dados<center></td></tr>`;
+                    
+                    tableData.innerHTML += txt;
+                }
+            })
+
+            function sendData() {
+                const date = new Date();
+
+                const month = months_names[date.getMonth()];
+                const day = (date.getDate()).toString();
+                const day_of_week = day_of_week_names[date.getDay()];
+
+                const time = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+                
                 const local = document.getElementById("local").value;
+
                 if (local != "") {
                     const indexTemperature = Math.floor(Math.random()*temperature.length);
                     const indexHumidity = Math.floor(Math.random()*humidity.length);
                     const indexWind = Math.floor(Math.random()*wind.length);
                     const indexRain = Math.floor(Math.random()*rain.length);
 
-                    console.log(indexTemperature,temperature[indexTemperature] );
+                    const post = {
+                        "local": local,
+                        "month": month,
+                        "day_of_week": day_of_week,
+                        "day": day,
+                        "time": time,
+                        "temperature": temperature[indexTemperature],
+                        "humidity": humidity[indexHumidity],
+                        "wind": wind[indexWind],
+                        "rain": rain[indexRain]
+                    }
+
+                    return fetch("/sensors/data", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(post)
+                    }).then(response => {
+                        if (response.status == 200) {
+                            return response.json();
+                        } else {
+                            throw new Error("Erro ao enviar os dados");
+                        }
+                    }).then(result => {
+                        const tableData = document.getElementById("tableData");
+
+                        let txt = `<tr><td>${post.temperature}ºC</td><td>${post.humidity}%</td><td>${post.wind} km/h</td><td>${post.rain} mm/m2</td></tr>` + tableData.innerHTML;
+                        
+                        tableData.innerHTML = txt;
+                    }).catch(error => {
+                        alert(error)
+                    })
+                } else {
+                    alert("Localidade não selecionada!");
                 }
-            })
+            }
             </script>
 
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"

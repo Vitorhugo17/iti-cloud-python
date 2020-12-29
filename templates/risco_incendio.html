@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png"
-        href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/img/favicon.png" />
+        href="/static/img/favicon.png" />
     <title>FireData</title>
-    <link rel="stylesheet" href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/css/bootstrap.min.css">
-    <link rel="stylesheet" href="C:/Users/celta/Desktop/Node Js/ITI Font/iti-cloud-python/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
 
 <body>
@@ -27,18 +27,18 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {% for result in results %}
                                 <tr>
-                                    <td>Braga</td>
-                                    <td class="bg-danger">75%</td>
+                                    <td>{{ result['local']}}</td>
+                                    {% if result['probability'] > 0.7 %}
+                                    <td class="bg-danger">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    {% elif result['probability'] > 0.3 %}
+                                    <td class="bg-warning">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    {% else %}
+                                    <td class="bg-success">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    {% endif %}
                                 </tr>
-                                <tr>
-                                    <td>Guimarães</td>
-                                    <td class="bg-warning">50%</td>
-                                </tr>
-                                <tr>
-                                    <td>Porto</td>
-                                    <td class="bg-success">20%</td>
-                                </tr>
+                                {% endfor %}
                         </table>
                     </div>
                     <button class="btn btn-success">Regressar</button>

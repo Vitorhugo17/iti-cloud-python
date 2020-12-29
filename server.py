@@ -103,9 +103,7 @@ def forest_fire_probability():
 
         results.append(result)
 
-    print(results)
-
-    return render_template("risco_incendio.html", results=json.dumps(results))
+    return render_template("risco_incendio.html", results=results)
     # return Response(json.dumps(results), mimetype='application/json')
 
 
@@ -118,7 +116,7 @@ def sensores_data():
     day_of_week = req_data['day_of_week']
     day = req_data['day']
     temperature = req_data['temperature']
-    rh = req_data['rh']
+    rh = req_data['humidity']
     wind = req_data['wind']
     rain = req_data['rain']
     time = req_data['time']
