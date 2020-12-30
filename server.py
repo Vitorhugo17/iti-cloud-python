@@ -2,7 +2,6 @@ import os
 import datetime
 import pandas as pd
 import numpy as np
-import mysql.connector
 import warnings
 import sklearn
 import pickle
@@ -10,6 +9,7 @@ from sklearn.model_selection import train_test_split
 # from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from flask import request, Response, Flask, render_template
+from flask_mysqldb import MySQL
 import json
 
 warnings.filterwarnings('ignore')
@@ -20,23 +20,21 @@ months_index = {'jan':'01','feb': '02','mar': '03','apr': '04','may': '05',
 months_names = {'01': 'jan','02': 'feb','03': 'mar','04': 'apr','05': 'may',
            '06': 'jun','07': 'jul','08': 'aug','09': 'sep','10': 'oct','11': 'nov','12': 'dec'}
 
-mydb = mysql.connector.connect(
-  host='eu-cdbr-west-03.cleardb.net',
-  user='bbf0bb7ad96b16',
-  password='bc7d6872',
-  database='heroku_6190d228ed81d9a'
-)
-
 # creates a Flask application, named app
 app = Flask(__name__)
 app.config['DEBUG'] = True
+app.config['MYSQL_HOST'] = 'eu-cdbr-west-03.cleardb.net'
+app.config['MYSQL_USER'] = 'bbf0bb7ad96b16'
+app.config['MYSQL_PASSWORD'] = 'bc7d6872'
+app.config['MYSQL_DB'] = 'heroku_6190d228ed81d9a'
 
+mysql = MySQL(app)
 
 @app.route('/forest/fire/probability', methods=['GET'])
 def forest_fire_probability():
     results = []
     
-    mycursor = mydb.cursor()
+    mycursor = mysql.connection.cursor()
     mycursor.execute('SELECT * FROM sensors_data')
     myresult = mycursor.fetchall()
     mycursor.close()
@@ -125,10 +123,10 @@ def sensores_data():
 
     sql = 'INSERT INTO sensors_data (local,month,day_of_week,day,temperature,rh,wind,rain,time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
 
-    mycursor = mydb.cursor()
+    mycursor = mysql.connection.cursor()
     mycursor.execute(sql, val)
     
-    mydb.commit() 
+    mysql.connection.commit() 
 
     print(mycursor.rowcount, 'record inserted.')
     mycursor.close()
@@ -143,7 +141,7 @@ def home():
     wind = []
     rain = []
 
-    mycursor = mydb.cursor()
+    mycursor = mysql.connection.cursor()
     mycursor.execute('SELECT * FROM training_data')
     myresult = mycursor.fetchall()
     mycursor.close()
