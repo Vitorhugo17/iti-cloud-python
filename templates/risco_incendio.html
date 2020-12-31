@@ -33,11 +33,11 @@
                                 <tr>
                                     <td>{{ result['local']}}</td>
                                     {% if result['probability'] > 0.7 %}
-                                    <td class="bg-danger">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    <td class="bg-danger text-white">{{ (result['probability'] * 100)|round(2) }}%</td>
                                     {% elif result['probability'] > 0.3 %}
-                                    <td class="bg-warning">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    <td class="bg-warning text-white">{{ (result['probability'] * 100)|round(2) }}%</td>
                                     {% else %}
-                                    <td class="bg-success">{{ (result['probability'] * 100)|round(2) }}%</td>
+                                    <td class="bg-success text-white">{{ (result['probability'] * 100)|round(2) }}%</td>
                                     {% endif %}
                                 </tr>
                                 {% endfor %}
@@ -45,7 +45,7 @@
                     </div>
                     <div class="row">
                         <div class="col-1 p-1 mb-1 bg-success text-white"><font size="1%">Baixo</font></div>
-                        <div class="col-1 p-1 mb-1 bg-warning text-dark"><font size="1%">Médio</font></div>
+                        <div class="col-1 p-1 mb-1 bg-warning text-white"><font size="1%">Médio</font></div>
                         <div class="col-1 p-1 mb-1 bg-danger text-white"><font size="1%">Elevado</font></div>
                     </div>
                     <br>
